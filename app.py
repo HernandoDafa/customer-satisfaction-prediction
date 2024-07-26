@@ -7,13 +7,13 @@ from sklearn.preprocessing import StandardScaler, LabelEncoder
 model = joblib.load('best_model.pkl')
 
 # Memuat data untuk pengkodean dan penskalaan
-data = pd.read_csv('onlinefood.csv')
+data = pd.read_csv('onlinefoods.csv')
 
 # Daftar kolom yang diperlukan selama pelatihan
-kolom_diperlukan = ['Usia', 'Jenis_Kelamin', 'Status_Perkawinan', 'Pekerjaan', 'Pendapatan_Bulanan', 'Pendidikan_Terakhir', 'Ukuran_Keluarga', 'Latitude', 'Longitude', 'Kode_Pos']
+required_columns = ['Age', 'Gender', 'Marital Status', 'Occupation', 'Monthly Income', 'Educational Qualifications', 'Family size', 'latitude', 'longitude', 'Pin code']
 
 # Pastikan hanya kolom yang diperlukan ada
-data = data[kolom_diperlukan]
+data = data[required_columns]
 
 # Pra-pemrosesan data
 label_encoders = {}
@@ -25,12 +25,12 @@ for column in data.select_dtypes(include=['object']).columns:
     label_encoders[column] = le
 
 scaler = StandardScaler()
-fitur_numerik = ['Usia', 'Ukuran_Keluarga', 'Lintang', 'Bujur', 'Kode_Pos']
-data[fitur_numerik] = scaler.fit_transform(data[fitur_numerik])
+numeric_features = ['Age', 'Family size', 'latitude', 'longitude', 'Pin code']
+data[numeric_features] = scaler.fit_transform(data[numeric_features])
 
 # Fungsi untuk memproses input pengguna
 def preprocess_input(user_input):
-    processed_input = {col: [user_input.get(col, 'Unknown')] for col in kolom_diperlukan}
+    processed_input = {col: [user_input.get(col, 'Unknown')] for col in required_columns}
     for column in label_encoders:
         if column in processed_input:
             input_value = processed_input[column][0]
@@ -40,14 +40,14 @@ def preprocess_input(user_input):
                 # Jika nilai tidak dikenal, berikan nilai default seperti -1
                 processed_input[column] = [-1]
     processed_input = pd.DataFrame(processed_input)
-    processed_input[fitur_numerik] = scaler.transform(processed_input[fitur_numerik])
+    processed_input[numeric_features] = scaler.transform(processed_input[numeric_features])
     return processed_input
 
 # CSS for styling
 st.markdown("""
     <style>
     body {
-        background-color: #e8f4f8;
+        background-color: #f5f5f5;
     }
     .stApp {
         background-color: #ffffff;
@@ -94,7 +94,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Antarmuka Streamlit
-st.title("Prediksi Kepuasan Pelanggan Layanan Makanan Online")
+st.title("Prediksi Kepuasan Pelanggan Makanan Online")
 
 st.markdown("<h3>Masukkan Data Pelanggan</h3>", unsafe_allow_html=True)
 
@@ -102,30 +102,30 @@ st.markdown("<h3>Masukkan Data Pelanggan</h3>", unsafe_allow_html=True)
 col1, col2 = st.columns(2)
 
 with col1:
-    usia = st.number_input('Usia', min_value=18, max_value=100)
-    jenis_kelamin = st.selectbox('Jenis Kelamin', ['Laki-laki', 'Perempuan'])
-    status_perkawinan = st.selectbox('Status Perkawinan', ['Lajang', 'Menikah'])
-    pekerjaan = st.selectbox('Pekerjaan', ['Pelajar', 'Pegawai', 'Wiraswasta'])
+    age = st.number_input('Umur', min_value=18, max_value=100)
+    gender = st.selectbox('Jenis Kelamin', ['Laki-laki', 'Perempuan'])
+    marital_status = st.selectbox('Status Perkawinan', ['Lajang', 'Menikah'])
+    occupation = st.selectbox('Pekerjaan', ['Pelajar', 'Pegawai', 'Wiraswasta'])
 
 with col2:
-    pendapatan_bulanan = st.selectbox('Pendapatan Bulanan', ['Tidak Berpenghasilan', 'Di Bawah Rp10,000,000', 'Rp10,000,000 - Rp25,000,000', 'Rp25,000,000 - Rp50,000,000', 'Lebih dari Rp50,000,000'])
-    pendidikan_terakhir = st.selectbox('Pendidikan Terakhir', ['Sarjana Muda', 'Sarjana', 'Pasca Sarjana'])
-    ukuran_keluarga = st.number_input('Ukuran Keluarga', min_value=1, max_value=20)
-    lintang = st.number_input('Lintang', format="%f")
-    bujur = st.number_input('Bujur', format="%f")
-    kode_pos = st.number_input('Kode Pos', min_value=100000, max_value=999999)
+    monthly_income = st.selectbox('Pendapatan Bulanan', ['Tidak Berpenghasilan', 'Di Bawah Rp10,000,000', 'Rp10,000,000 - Rp25,000,000', 'Rp25,000,000 - Rp50,000,000', 'Lebih dari Rp50,000,000'])
+    educational_qualifications = st.selectbox('Pendidikan Terakhir', ['Sarjana Muda', 'Sarjana', 'Pasca Sarjana'])
+    family_size = st.number_input('Ukuran Keluarga', min_value=1, max_value=20)
+    latitude = st.number_input('Lintang', format="%f")
+    longitude = st.number_input('Bujur', format="%f")
+    pin_code = st.number_input('Kode Pos', min_value=100000, max_value=999999)
 
 user_input = {
-    'Usia': usia,
-    'Jenis_Kelamin': jenis_kelamin,
-    'Status_Perkawinan': status_perkawinan,
-    'Pekerjaan': pekerjaan,
-    'Pendapatan_Bulanan': pendapatan_bulanan,
-    'Pendidikan_Terakhir': pendidikan_terakhir,
-    'Ukuran_Keluarga': ukuran_keluarga,
-    'Lintang': lintang,
-    'Bujur': bujur,
-    'Kode_Pos': kode_pos
+    'Age': age,
+    'Gender': gender,
+    'Marital Status': marital_status,
+    'Occupation': occupation,
+    'Monthly Income': monthly_income,
+    'Educational Qualifications': educational_qualifications,
+    'Family size': family_size,
+    'latitude': latitude,
+    'longitude': longitude,
+    'Pin code': pin_code
 }
 
 if st.button('Prediksi'):
